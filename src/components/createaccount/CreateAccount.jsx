@@ -36,7 +36,7 @@ try {
         localStorage.setItem('authTokens', JSON.stringify(accountAuthTokens));
         localStorage.setItem('account',JSON.stringify(account))
         navigate('/bankservices')
-        // setAccountNames(accountName)
+   
      
     } else if (response.data.message === "Only customers can create accounts") {
             setMessage("Only customers can create accounts.");
