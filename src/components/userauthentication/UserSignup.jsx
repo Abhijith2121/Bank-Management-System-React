@@ -26,31 +26,27 @@ function UserSignup() {
                 password: password,
                 confirm_password: confirmPassword
             });
-            if (response.data.message === "Registered Successfully") {
-                setMessage("Registered Successfully");
-                navigate('/login');
-            } else {
-                if (response.data.message && Array.isArray(response.data.message)) {
-                    const errorMessage = response.data.message.join(' ');
-                    setMessage(errorMessage);
-                } else if (response.data.message === "Password does not match") {
-                    setMessage("Password does not match");
-                } else if (response.data.message === "Email Already Exists") {
-                    setMessage("Email Already Exists");
-                } else if (response.data.message === "Username already in use") {
-                    setMessage("Username already in use");
-                } else if (response.data.message === "Username is required") {
-                    setMessage("Username is required");
-                } else if (response.data.message === "Password is required") {
-                    setMessage("Password is required");
-                } else if (response.data.message === "Please confirm the password") {
-                    setMessage("Please confirm the password");
-                } else if (response.data.message === "Email is required") {
-                    setMessage("Email is required");
-                } else if (response.data.message === "All fields are required") {
-                    setMessage("All fields are required");
-                }
-            }
+            const messageMapping = {
+                "Registered Successfully": "Registered Successfully",
+                "Password does not match": "Password does not match",
+                "Email Already Exists": "Email Already Exists",
+                "Username already in use": "Username already in use",
+                "Username is required": "Username is required",
+                "Password is required": "Password is required",
+                "Please confirm the password": "Please confirm the password",
+                "Email is required": "Email is required",
+                "All fields are required": "All fields are required",
+              };
+
+              const responseMessage=response.data.message
+              if(responseMessage === "Registered Successfully"){
+                setMessage("Registered Successfully")
+                navigate('/login')
+              } else{
+                const errorMessage=Array.isArray(responseMessage)
+                ? responseMessage.join(' '): messageMapping[responseMessage]
+                setMessage(errorMessage || "An unexpected error occurred")
+              }             
         } catch (err) {
             alert("User Registration failed: " + err.message);
         }

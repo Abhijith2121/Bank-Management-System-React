@@ -27,8 +27,7 @@ try {
             access_token: response.data.access_token,
             refresh_token: response.data.refresh_token,
           };
-          const decodedToken=jwtDecode(accountAuthTokens.access_token)
-          const accountNumber=decodedToken.account_number
+          const accountNumber=jwtDecode(accountAuthTokens.access_token).account_number
           const account={
             account_name:accountName,
             account_number:accountNumber
@@ -37,10 +36,8 @@ try {
         localStorage.setItem('authTokens', JSON.stringify(accountAuthTokens));
         localStorage.setItem('account',JSON.stringify(account))
         navigate('/bankservices')
-        setAccountNames(accountName)
-
-        
-            
+        // setAccountNames(accountName)
+     
     } else if (response.data.message === "Only customers can create accounts") {
             setMessage("Only customers can create accounts.");
         } else if (response.data.message === "An account with this name already exists") {

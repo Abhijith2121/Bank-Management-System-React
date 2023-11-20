@@ -26,9 +26,8 @@ function StaffDashboard() {
     const fetchData = async () => {
       try {
         const response = await list('accountdetails/');
-        const staffListResponse = response.data.results;
-        setAccounts(staffListResponse);
-        setOriginalAccounts(staffListResponse);
+        setAccounts(response.data.results);
+        setOriginalAccounts(response.data.results);
         setNextLink(response.data.next);
         setPreviousLink(response.data.previous);
       } catch (error) {

@@ -15,6 +15,11 @@ function AdminDashboard() {
     const [originalUsers, setOriginalUsers] = useState([]);
     const [search, setSearch] = useState('')
    
+    const disappear=(time)=>{
+        const timeoutId = setTimeout(() => {
+            setMessage('');
+          }, time);
+    }
   
     useEffect(() => {
         const fetchData = async () => {
@@ -29,7 +34,8 @@ function AdminDashboard() {
                 setPreviousLink(response.data.previous);
             } catch (error) {
                 console.log('An error occurred:', error);
-                setMessage(error);       
+                setMessage(error); 
+                disappear(2000)      
             }
         };
         fetchData();
@@ -46,9 +52,7 @@ function AdminDashboard() {
         }catch (error) {
           console.log('An error occurred:', error);
           setMessage(error);
-          const timeoutId = setTimeout(() => {
-            setMessage('');
-          }, 2000);
+          disappear(2000)
         }
       }
   
@@ -64,9 +68,7 @@ function AdminDashboard() {
             }else if(response.data.message==="User not found"){
                 setMessage(response.data.message)
             }
-            const timeoutId = setTimeout(() => {
-                setMessage('');
-              }, 2000);
+           disappear(2000)
         }catch(error){
             alert("User Registration failed: " + error.message);
         }
@@ -79,6 +81,7 @@ function AdminDashboard() {
           setUsers(response.data);
         }catch (error) {
           setMessage(error);
+          disappear(2000)
         }
         
       }
