@@ -1,0 +1,20 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:  
+    branches:
+      - main
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Dispatch workflow in other repo
+      run: |
+        curl -X POST -u "${{ github.actor }}" \
+         -H "Accept: application/vnd.github.v3+json" \
+         -H "Content-Type: application/json" \  
+         -d '{"event_type": "notify"}' \
+         https://api.github.com/repos/Sreesanth46/coverage-notfication/dispatches
