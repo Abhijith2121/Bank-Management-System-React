@@ -8,17 +8,16 @@ function DepositForm() {
   const [accountNumber, setAccountNumber] = useState('');
   const [message, setMessage] = useState('');
 
+
+  const disappear=(time)=>{
+    setTimeout(() => {
+        setMessage('');
+      }, time);
+}
+
   useEffect(() => {
     const authTokens = JSON.parse(localStorage.getItem('authTokens'));
-    console.log(authTokens);
-    if (authTokens && authTokens.access_token) {
-      const decodedToken = jwtDecode(authTokens.access_token);
-      const username = decodedToken.username;
-      const accountNumber1 = decodedToken.account_number;
-      setAccountNumber(decodedToken.account_number);
-    } else {
-      console.log("No token");
-    }
+    authTokens?.access_token ? setAccountNumber(jwtDecode(authTokens.access_token)?.account_number):console.log("No Tokens")
   }, []);
 
   const handleDeposit = async (e) => {
@@ -31,19 +30,10 @@ function DepositForm() {
   
     try {
       const response = await deposit(data);
-      if (response.status === 200) {
-        if (response.data.message === "Deposit Successfully") {
-          setMessage("Amount Deposited");
-          const timeoutId = setTimeout(() => {
-            setMessage('');
-          }, 2000);
-        }
-      }
+      response.status === 200 && response.data.message === 'Deposit Successfully' && (setMessage('Amount Deposited'), disappear(2000));
     } catch (error) {
       setMessage(error);
-       setTimeout(() => {
-        setMessage('');
-      }, 2000);
+      disappear(2000)
     }
   };
   

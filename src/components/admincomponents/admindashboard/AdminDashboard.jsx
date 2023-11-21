@@ -16,7 +16,7 @@ function AdminDashboard() {
     const [search, setSearch] = useState('')
    
     const disappear=(time)=>{
-        const timeoutId = setTimeout(() => {
+        setTimeout(() => {
             setMessage('');
           }, time);
     }
@@ -27,13 +27,11 @@ function AdminDashboard() {
             try {
                 const response = await list('adminlist/');
                 const usersListResponse = response.data;
-                console.log("From AdminDashboard component " + usersListResponse);
                 setUsers(usersListResponse.results);
                 setOriginalUsers(usersListResponse.results);
                 setNextLink(response.data.next);
                 setPreviousLink(response.data.previous);
             } catch (error) {
-                console.log('An error occurred:', error);
                 setMessage(error); 
                 disappear(2000)      
             }
@@ -45,12 +43,9 @@ function AdminDashboard() {
         try{
           const response=await pagination(url)
           setUsers(response.data.results) 
-          console.log("pagiantion"+response.data.next)
-          console.log("pagination"+response.data.previous)
           setNextLink(response.data.next);
           setPreviousLink(response.data.previous);
         }catch (error) {
-          console.log('An error occurred:', error);
           setMessage(error);
           disappear(2000)
         }
@@ -61,14 +56,8 @@ function AdminDashboard() {
         setUsers([...updatedUsers]); 
         try{
             const response=await deleteUserAccount(id);
-            if(response.data.message==="User deleted successfully"){
-                setMessage(response.data.message)
-            }else if(response.data.message==="User id is required"){
-                setMessage(response.data.message)
-            }else if(response.data.message==="User not found"){
-                setMessage(response.data.message)
-            }
-           disappear(2000)
+            setMessage(response.data.message === "User deleted successfully" || response.data.message === "User id is required" || response.data.message === "User not found" ? response.data.message : undefined);
+            disappear(2000)
         }catch(error){
             alert("User Registration failed: " + error.message);
         }
@@ -77,7 +66,6 @@ function AdminDashboard() {
     const handleSearchApi=async(name)=>{
         try{
           const response = await searchbyName(`/searchusers/?search=${name}`);
-       
           setUsers(response.data);
         }catch (error) {
           setMessage(error);

@@ -39,14 +39,16 @@ function UserSignup() {
               };
 
               const responseMessage=response.data.message
-              if(responseMessage === "Registered Successfully"){
-                setMessage("Registered Successfully")
-                navigate('/login')
-              } else{
-                const errorMessage=Array.isArray(responseMessage)
-                ? responseMessage.join(' '): messageMapping[responseMessage]
-                setMessage(errorMessage || "An unexpected error occurred")
-              }             
+              setMessage(
+                responseMessage === 'Registered Successfully'
+                  ? (() => {
+                      navigate('/login');
+                      return 'Registered Successfully';
+                    })()
+                  : Array.isArray(responseMessage)
+                  ? responseMessage.join(' ')
+                  : messageMapping[responseMessage] || 'An unexpected error occurred'
+              );
         } catch (err) {
             alert("User Registration failed: " + err.message);
         }

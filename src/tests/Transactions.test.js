@@ -4,13 +4,15 @@ import Transaction from '../components/transactions/Transaction';
 import { transactionsHistory,downloadTransaction,deleteTransaction } from '../services/ApiServices';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-
+import { jwtDecode } from 'jwt-decode';
 jest.mock('../services/ApiServices', () => ({
     ...jest.requireActual('../services/ApiServices'),
     transactionsHistory: jest.fn(),
     downloadTransaction:jest.fn(),
     deleteTransaction:jest.fn()
 }));
+
+jest.mock("jwt-decode")
 
 describe('Transaction Component', () => {
     test('renders transactions and handles download transaction', async () => {
@@ -40,8 +42,32 @@ describe('Transaction Component', () => {
             screen.findByText(/100/i)
             screen.findByText(/2023-01-01T12:00:00Z/i)
         })
-
     });
+
+
+test("Sets accountNumber from localStorage",async()=>{
+    
+    jest.spyOn(Storage.prototype,"getItem").mockReturnValue(
+        JSON.stringify({
+            access_token:"mockAccessToken",
+            refresh_token:"mockrefreshtoken"
+        })
+    )
+    jwtDecode.mockReturnValue({account_number:"mockaccountnumber"})
+    transactionsHistory.mockResolvedValue({
+        data: {
+            transactions: [
+              { id: 1, amount: 100, transaction_type: "credit", created_at: "2023-01-01" },
+            
+            ],
+          },
+    })
+    render(<Transaction/>)
+    expect(transactionsHistory).toHaveBeenCalledWith({
+        account_number: "mockaccountnumber",
+      });
+})
+
 
     test('handles download transaction with error', async () => {
         transactionsHistory.mockResolvedValueOnce({
@@ -499,6 +525,80 @@ test('handles no auth tokens', async () => {
     });
 
 });
+test('renders message when there are no transactions', async () => {
+    transactionsHistory.mockResolvedValueOnce({
+        data: {
+            transactions: [],
+        },
+    });
+
+    render(<Transaction />);
+    await waitFor(() => {
+        expect(screen.findByText('No transactions available'))
+    });
+});
+test('handles server error from API', async () => {
+    transactionsHistory.mockRejectedValueOnce(new Error('Server error'));
+
+    render(<Transaction />);
+    await waitFor(() => {
+        expect(screen.findByText('Error fetching transactions'))
+    });
+});
+
+test('handles error in transactionsHistory API call', async () => {
+    const errorMessage = 'Error fetching transactions';
+    transactionsHistory.mockRejectedValueOnce(new Error(errorMessage))
+    const mockAuthTokens = {
+        access_token: 'fakeToken',
+        account_number: '123456789',
+    };
+    await act(async () => {
+        render(<Transaction />);
+    });
+    await waitFor(() => {
+        expect(screen.findByText(errorMessage))
+        expect(transactionsHistory).toHaveBeenCalledWith(mockAuthTokens);
+    });
+});
+test('handles successful download transaction', async () => {
+
+    await act(async () => {
+        render(<Transaction />);
+    });
+
+    downloadTransaction.mockResolvedValueOnce({
+        data: {
+            message: 'Transaction data saved successfully',
+        },
+    });
+
+    await waitFor(() => {
+        fireEvent.click(screen.getByText('Download'));
+    });
+
+    await waitFor(() => {
+        expect(downloadTransaction).toHaveBeenCalled();
+        
+    });
+});
+test('handles error in download transaction', async () => {
+        render(<Transaction />);
+
+    downloadTransaction.mockRejectedValueOnce(new Error('Download error'));
+
+    await waitFor(() => {
+        fireEvent.click(screen.getByText('Download'));
+    });
+
+    await waitFor(() => {
+        expect(screen.findByText('Download error'))
+    });
+});
+
+
+
+
 
 
 

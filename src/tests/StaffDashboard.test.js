@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import StaffDashboard from '../components/staffcomponents/staffdashboard/StaffDashboard';
 import { list,openAccount,closeAccount,pagination,searchbyName } from '../services/ApiServices';
 import '@testing-library/jest-dom'
+import userEvent from '@testing-library/user-event';
 
 
 jest.mock('../services/ApiServices', () => ({
@@ -46,7 +47,7 @@ describe('StaffDashboard Component', () => {
     expect(list).toHaveBeenCalledTimes(1);
   });
 
-  test("close Account",async()=>{
+  test("open Account",async()=>{
     const mockListResponse = {
         data: {
           results: [
@@ -87,6 +88,42 @@ describe('StaffDashboard Component', () => {
     });
   })
 
+  test("open Account error",async()=>{
+    const mockListResponse = {
+        data: {
+          results: [
+            {
+              id: 1,
+              account_name: 'Test Account',
+              account_number: '1234567890',
+              status: 'pending',
+              customer: {
+                username: 'testuser',
+              },
+            },
+          ],
+          next: 'next_page_url',
+          previous: 'prev_page_url',
+        },
+      };
+  
+      list.mockResolvedValueOnce(mockListResponse);
+      render(<StaffDashboard />);
+  
+      await waitFor(() => {
+        screen.findByText(/Test Account/i);
+        screen.findByText(/1234567890/i);
+        screen.findByText(/Pending/i);
+        screen.findByText(/testuser/i);
+      });
+    openAccount.mockRejectedValue("Error in opening account")
+
+    fireEvent.click(screen.getByText("open")); 
+    await waitFor(() => {
+      screen.getByText(/Error in opening account/i);
+     
+    });
+  })
   test("close Account",async()=>{
     const mockListResponse = {
         data: {
@@ -125,6 +162,42 @@ describe('StaffDashboard Component', () => {
     await waitFor(() => {
       screen.getByText(/Account is now in pending state/i);
       screen.findByText(/pending/i)
+    });
+  })
+
+  test("close Account error",async()=>{
+    const mockListResponse = {
+        data: {
+          results: [
+            {
+              id: 1,
+              account_name: 'Test Account',
+              account_number: '1234567890',
+              status: 'active',
+              customer: {
+                username: 'testuser',
+              },
+            },
+          ],
+          next: 'next_page_url',
+          previous: 'prev_page_url',
+        },
+      };
+  
+      list.mockResolvedValueOnce(mockListResponse);
+      render(<StaffDashboard />);
+  
+      await waitFor(() => {
+        screen.findByText(/Test Account/i);
+        screen.findByText(/1234567890/i);
+        screen.findByText(/Pending/i);
+        screen.findByText(/testuser/i);
+      });
+      closeAccount.mockRejectedValue("Error in closing account")
+
+    fireEvent.click(screen.getByText("close")); 
+    await waitFor(() => {
+      screen.getByText(/Error in closing account/i);
     });
   })
 
@@ -388,4 +461,52 @@ describe('StaffDashboard Component', () => {
           expect(screen.findByText(errorMessage))
         });
       });
+
+      test("handles sorting of accounts", async () => {
+        const mockAccounts = [
+          { id: 1, account_name: "Account 1", account_number: "123456", status: "active", customer: { username: "User1" } },
+          { id: 2, account_name: "Account 2", account_number: "789012", status: "pending", customer: { username: "User2" } },
+        ];
+    
+        list.mockResolvedValue({ data: { results: mockAccounts, next: null, previous: null } });
+
+        render(<StaffDashboard />);
+  
+        const sortButton = screen.getByText(/Filter/i);
+        userEvent.click(sortButton);
+        
+        await waitFor(() => {
+        const account1 = screen.getByText(/Account 1/i);
+        const account2 = screen.getByText(/Account 2/i);
+        expect(account1).toBeInTheDocument();
+        expect(account2).toBeInTheDocument();
+        })
+      });
+      
+
+      test("handles errors when fetching accounts", async () => {
+        const errorMessage = "Failed to fetch accounts";
+        list.mockRejectedValue(errorMessage);
+    
+        render(<StaffDashboard />);
+    
+        await waitFor(() => {
+          screen.findByText(errorMessage);
+         
+        });
+      });
+
+      test("handles errors when paginating accounts", async () => {
+        const errorMessage = "Failed to paginate accounts";
+        const nextLink = "/api/accounts/?page=2";
+        list.mockResolvedValueOnce({ data: { results: [], next: nextLink, previous: null } });
+        pagination.mockRejectedValue((errorMessage));
+    
+        render(<StaffDashboard />);
+        await waitFor(() => {
+          screen.findByText(errorMessage);
+        });
+      });
+    
+
   });

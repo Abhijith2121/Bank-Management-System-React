@@ -7,9 +7,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { AuthProvider } from '../contexts/AuthContext';
 import 'jest-localstorage-mock';
 import '@testing-library/jest-dom'
+import 'jest-localstorage-mock';
+import { jwtDecode } from "jwt-decode";
+import userEvent from "@testing-library/user-event";
 
 
-
+jest.mock("jwt-decode");
 jest.mock('react-router-dom', () => ({
     useNavigate: jest.fn(),
 }));
@@ -32,8 +35,6 @@ jest.mock('../contexts/AuthContext', () => ({
 }));
 
 
-const setAccountNames = jest.fn();
-
 const renderWithProvider = (component) => {
     return render(<AuthProvider>{component}</AuthProvider>);
 };
@@ -43,9 +44,29 @@ describe('CreateAccount Component', () => {
 
     beforeEach(() => {
 
-        jest.clearAllMocks();
-        
+        jest.clearAllMocks();    
     });
+
+    test("handles account creation and sets tokens in localStorage", async () => {
+      createAccount.mockResolvedValue({
+        data: {
+          message: "Account Created Successfully",
+          access_token: "mockAccessToken",
+          refresh_token: "mockRefreshToken",
+        },
+      });
+
+      jwtDecode.mockReturnValue({ account_number: "mockAccountNumber" });
+      jest.spyOn(Storage.prototype, "setItem");
+      render(<CreateAccount />);
+      userEvent.type(screen.getByTestId("account-input"), "TestAccount");
+      fireEvent.click(screen.getByText("Go to My Account"));
+      await act(async () => {  
+        screen.findByText(/Account Created Successfully/i);
+      }); 
+    });
+   
+
     test('Create Account successfully', async () => {
 
         const mockNavigate = jest.fn();
@@ -59,8 +80,7 @@ describe('CreateAccount Component', () => {
                 refresh_token: "refresh_token"
             },
         });
-
-
+        
         renderWithProvider(<CreateAccount />);
         const accountNameElement = screen.getByText('Account Name');
         expect(accountNameElement).toBeInTheDocument();
@@ -69,9 +89,41 @@ describe('CreateAccount Component', () => {
            
             screen.findByText(/Account Created Successfully/i);
           });
-       
-       
     });
+
+    test('Create Account successfully', async () => {
+      const errorMessage = 'User Registration failed:Error in Creating Account'
+      const alertSpy = jest.spyOn(window, 'alert');
+      const mockNavigate = jest.fn();
+      useNavigate.mockReturnValue(mockNavigate);
+      
+      createAccount.mockRejectedValueOnce('Error in Creating Account');
+      renderWithProvider(<CreateAccount />);
+      const accountNameElement = screen.getByText('Account Name');
+      expect(accountNameElement).toBeInTheDocument();
+      fireEvent.click(screen.getByText(/Go to My Account/i));
+      await waitFor(()=>{
+        expect(alertSpy).toHaveBeenCalled();
+    })
+     
+     
+  });
+
+    test('renders CreateAccount component', () => {
+      const mockNavigate = jest.fn();
+      useNavigate.mockReturnValue(mockNavigate);
+    
+      render(<CreateAccount />);
+    
+      const titleElement = screen.getByText('Create Account');
+      const accountNameLabel = screen.getByText('Account Name');
+      const submitButton = screen.getByText('Go to My Account');
+    
+      expect(titleElement).toBeInTheDocument();
+      expect(accountNameLabel).toBeInTheDocument();
+      expect(submitButton).toBeInTheDocument();
+    });
+    
 
     test('Only customers can create accounts', async () => {
 
@@ -149,6 +201,29 @@ describe('CreateAccount Component', () => {
         expect(accountName.value).toBe('accountname');
        
     });
+    test('handles create account generic error', async () => {
+      const errorMessage = 'Failed to create account';
+      createAccount.mockRejectedValueOnce(errorMessage);
+    
+      render(<CreateAccount />);
+    
+      const accountName=document.querySelector('[data-testid="account-input"]')
+        fireEvent.change(accountName, { target: { value: 'accountname' } });
+    
+      const submitButton = screen.getByText('Go to My Account');
+      fireEvent.click(submitButton);
+    
+      await waitFor(() => {
+        expect(screen.findByText(errorMessage));
+      });
+    
+      expect(createAccount).toHaveBeenCalledWith({
+        account_name: 'accountname',
+      });
+    });
+
+
+    
 
     test('handles localStorage updates', async () => {
        
@@ -177,6 +252,7 @@ describe('CreateAccount Component', () => {
     
       });
 
+
       test('handles create account error', async () => {
         const errorMessage = 'Account creation failed';
         createAccount.mockRejectedValueOnce((errorMessage));
@@ -198,7 +274,32 @@ describe('CreateAccount Component', () => {
         });
       });
 
+      test('does not navigate on account creation failure', async () => {
+        const mockNavigate = jest.fn();
+        useNavigate.mockReturnValue(mockNavigate);
+      
+        const errorMessage = 'Failed to create account';
+        createAccount.mockRejectedValueOnce(errorMessage);
+      
+        render(<CreateAccount />);
+      
+        const accountNameInput = screen.getByTestId('account-input');
+        fireEvent.change(accountNameInput, { target: { value: 'NewAccount' } });
+      
+        const submitButton = screen.getByText('Go to My Account');
+        fireEvent.click(submitButton);
+      
+        await waitFor(() => {
+          expect(mockNavigate).not.toHaveBeenCalled();
+        });
+      
+        expect(createAccount).toHaveBeenCalledWith({
+          account_name: 'NewAccount',
+        });
+      });
 
+     
+      
 test('handles create account error', async () => {
     const errorMessage = 'Account creation failed';
     createAccount.mockRejectedValueOnce({ message: errorMessage });

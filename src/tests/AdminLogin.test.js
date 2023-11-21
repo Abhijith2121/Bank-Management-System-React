@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Adminlogin from '../components/admincomponents/adminlogin/AdminLogin';
 import { adminLogin } from '../services/ApiServices';
 import { useNavigate,MemoryRouter } from 'react-router-dom';
+import userEvent from '@testing-library/user-event';
 
 
 jest.mock('../services/ApiServices', () => ({
@@ -41,6 +42,28 @@ describe('AdminLogin Component', () => {
 
         });
     });
+
+    test("toggles password visibility", async() => {
+        render(<Adminlogin />);
+    
+        const passwordInput = screen.getByPlaceholderText("Enter password");
+        expect(passwordInput.type).toBe("password");
+
+        const showPasswordButton = document.querySelector('.password-toggle');
+        userEvent.click(showPasswordButton);
+    
+        await waitFor(() => {
+            expect(passwordInput.type).toBe("text");
+          });
+          userEvent.click(showPasswordButton);
+
+          await waitFor(() => {
+            expect(passwordInput.type).toBe("password");
+          });
+
+      });
+
+
     test('handles error when admin login fails', async () => {
         adminLogin.mockRejectedValueOnce(('Admin login failed'));
  

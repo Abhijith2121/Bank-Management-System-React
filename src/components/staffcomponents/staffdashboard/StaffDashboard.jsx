@@ -3,7 +3,6 @@ import {list, openAccount,closeAccount,pagination,searchbyName} from '../../../s
 import SearchBox from '../../searchbox/SearchBox'
 import './staffdashboard.css'
 import { Button } from 'react-bootstrap';
-import { AiOutlineFilter } from 'react-icons/ai';
 import { MdFilterList } from 'react-icons/md';
 
 function StaffDashboard() {
@@ -52,11 +51,8 @@ function StaffDashboard() {
       return 0
     }
 
-    if(sortOrder === 'asc'){
-      return statusA === 'active' ? -1 : 1
-    }else{
-      return statusA === 'pending' ? -1 :1
-    }
+   return sortOrder === 'asc' ? (statusA === 'active' ? -1 : 1) : (statusA === 'pending' ? -1 : 1);
+
   })
   setAccounts(sortedAccounts)
  }
@@ -114,8 +110,7 @@ function StaffDashboard() {
   const handleSearchApi=async(name)=>{
     try{
       const response = await searchbyName(`/searchaccount/?search=${name}`);
-      const staffListResponse = response.data.results;
-      setAccounts(staffListResponse);
+      setAccounts(response.data.results);
     }catch (error) {
       setMessage(error);
       disappear(2000)

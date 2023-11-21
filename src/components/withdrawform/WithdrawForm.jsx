@@ -9,15 +9,14 @@ function WithdrawForm() {
   const [accountNumber, setAccountNumber] = useState('');
   const [message, setMessage] = useState('');
 
+  const disappear=(time)=>{
+    setTimeout(() => {
+        setMessage('');
+      }, time);
+}
   useEffect(() => {
     const authTokens = JSON.parse(localStorage.getItem('authTokens'));
-    if (authTokens && authTokens.access_token) {
-      const decodedToken = jwtDecode(authTokens.access_token);
-      const username = decodedToken.username;
-      setAccountNumber(decodedToken.account_number);
-    } else {
-      console.log("No token");
-    }
+    authTokens?.access_token ? setAccountNumber(jwtDecode(authTokens.access_token)?.account_number) :null
   }, []);
 
  
@@ -30,25 +29,13 @@ function WithdrawForm() {
   
     try {
       const response = await withdraw(data);
-      if (response.status === 200) {
-        if(response.data.message==="Withdraw Successfully"){
-          setMessage("Withdraw Successfully");
-          setTimeout(() => {
-            setMessage('');
-          }, 3000);
-        }
-       
-      }
+      response.status === 200 && response.data.message === 'Withdraw Successfully' && (setMessage('Withdraw Successfully'), disappear(2000));
     } catch (error) {
       setMessage(error);
-       setTimeout(() => {
-        setMessage('');
-      }, 3000);
+       disappear(2000)
     }
   };
   
-    
-
   return (
     <div className="container">
       <div className="row"> 

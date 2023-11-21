@@ -7,7 +7,6 @@ import { jwtDecode } from "jwt-decode";
 
 function AccountLogin() {
 
-
     const [accountNumber, setAccountNumber] = useState('')
     const [message, setMessage] = useState('')
     const navigate = useNavigate()
@@ -17,8 +16,6 @@ function AccountLogin() {
         const data = {
             account_number: accountNumber
         }
-
-
         try {
             const response = await accountLogin(data);
             const messageMapping = {
@@ -30,11 +27,9 @@ function AccountLogin() {
                             refresh_token: response.data.refresh_token,
                         };
                         const decodedToken = jwtDecode(accountAuthTokens.access_token);
-                        const accountNumber = decodedToken.account_number;
-                        const accountName = decodedToken.account_name;
                         const account = {
-                            account_name: accountName,
-                            account_number: accountNumber,
+                            account_name: decodedToken.account_name,
+                            account_number: decodedToken.account_number,
                         };
 
                         localStorage.setItem('authTokens', JSON.stringify(accountAuthTokens));
@@ -48,15 +43,11 @@ function AccountLogin() {
                 "Unauthorized access": { message: "Unauthorized access" },
             }
             const selectedMessage = messageMapping[response.data.message]
-            if (selectedMessage) {
-                setMessage(selectedMessage.message);
-                if (selectedMessage.action) {
-                    selectedMessage.action();
-                }
-            }
+            selectedMessage && (setMessage(selectedMessage.message), selectedMessage.action && selectedMessage.action());
+
         }
         catch (error) {
-            setMessage()
+            setMessage(error.message)
         }
     };
     return (

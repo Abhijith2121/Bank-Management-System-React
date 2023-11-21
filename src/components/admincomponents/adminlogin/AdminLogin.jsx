@@ -23,20 +23,15 @@ function Adminlogin() {
 
     try {
       const response = await adminLogin(data)
-      
-      const adminAuthTokens = {
+      localStorage.setItem('adminAuthTokens', JSON.stringify({
         access_token: response.data.access_token,
         refresh_token: response.data.refresh_token,
-      };
-     
-      localStorage.setItem('adminAuthTokens', JSON.stringify(adminAuthTokens));
+      }));
       navigate('/admindashboard')
-
     } catch (err) {
       alert("User Registration failed: " + err.message);
     }
   };
-
 
   return (
     <div>

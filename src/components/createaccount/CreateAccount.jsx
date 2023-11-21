@@ -3,13 +3,12 @@ import { createAccount } from '../../services/ApiServices';
 import './createaccount.css'
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
-import { useAuth } from '../../contexts/AuthContext';
+
 
 function CreateAccount() {
 
 const [accountName,setAccountName]=useState('')
 const [message,setMessage]=useState('')
-const { setAccountNames } = useAuth();
 const navigate=useNavigate()
 
 const handleCreateAccount=async(e)=>{
@@ -21,32 +20,32 @@ const data={
 try {
     const response = await createAccount(data);
 
-    if (response.data.message === "Account Created Successfully") {
-        setMessage("Account Created Successfully");
-        const accountAuthTokens = {
-            access_token: response.data.access_token,
-            refresh_token: response.data.refresh_token,
-          };
-          const accountNumber=jwtDecode(accountAuthTokens.access_token).account_number
-          const account={
-            account_name:accountName,
-            account_number:accountNumber
-        }
-          
-        localStorage.setItem('authTokens', JSON.stringify(accountAuthTokens));
-        localStorage.setItem('account',JSON.stringify(account))
-        navigate('/bankservices')
-   
-     
-    } else if (response.data.message === "Only customers can create accounts") {
-            setMessage("Only customers can create accounts.");
-        } else if (response.data.message === "An account with this name already exists") {
-            setMessage("An account with this name already exists");
-        }
-        else if (response.data.message === "Account Name is required") {
-            setMessage("Account Name is required");
-        }
-    
+    setMessage(
+        response.data.message === "Account Created Successfully"
+          ? (() => {
+              const accountAuthTokens = {
+                access_token: response.data.access_token,
+                refresh_token: response.data.refresh_token,
+              };
+              const accountNumber = jwtDecode(accountAuthTokens.access_token).account_number;
+              const account = {
+                account_name: accountName,
+                account_number: accountNumber,
+              };
+              localStorage.setItem('authTokens', JSON.stringify(accountAuthTokens));
+              localStorage.setItem('account', JSON.stringify(account));
+              navigate('/bankservices');
+              return "Account Created Successfully";
+            })()
+          : response.data.message === "Only customers can create accounts"
+          ? "Only customers can create accounts."
+          : response.data.message === "An account with this name already exists"
+          ? "An account with this name already exists"
+          : response.data.message === "Account Name is required"
+          ? "Account Name is required"
+          : undefined
+      );
+      
   } catch (error) {
    alert("Account Creation Faild"+error)
   }

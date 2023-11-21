@@ -15,9 +15,15 @@ function StaffList() {
     const [search, setSearch] = useState('')
 
     const disappear=(time)=>{
-      const timeoutId = setTimeout(() => {
+       setTimeout(() => {
           setMessage('');
         }, time);
+  }
+
+  const updatingUser=(status,id)=>{
+    const updatedUser = users.map((user) =>
+    user.id === id ? { ...user, status: status } : user);
+      setUsers(updatedUser);
   }
   
     useEffect(() => {
@@ -25,16 +31,14 @@ function StaffList() {
 
             try {
                 const response = await list('staffs/');
-                const usersListResponse = response.data.results;
-                setUsers(usersListResponse);
-                setOriginalUsers(usersListResponse)
+                setUsers(response.data.results);
+                setOriginalUsers(response.data.results)
                 setNextLink(response.data.next);
                 setPreviousLink(response.data.previous);
             } catch (error) {
                 setMessage(error);
                 disappear(2000)
             }
-
         };
 
         fetchData();
@@ -57,12 +61,11 @@ function StaffList() {
         status:"allowed"
        
      }
-      const updatedUser = users.map((user) =>
-      user.id === id ? { ...user, status: "allowed" } : user);
-        setUsers(updatedUser);
+      updatingUser("allowed",id)
       try {
         const response = await staffAllow(id,data)
         setMessage(response.data.message);
+        disappear(2000)
       } catch (error) {
         setMessage(error);
         disappear(2000)
@@ -74,31 +77,26 @@ function StaffList() {
         status:"not allowed"
        
      }
-      const updatedUser = users.map((user) =>
-      user.id === id ? { ...user, status: "not allowed" } : user);
-        setUsers(updatedUser);
+     updatingUser("not allowed",id)
       try {
         const response = await staffAllow(id,data)
         setMessage(response.data.message);
+        disappear(2000)
       } catch (error) {
         setMessage(error);
         disappear(2000)
       }
     };
-
-
   const handleSearchApi=async(name)=>{
     try{
       const response = await searchbyName(`/searchstaff/?search=${name}`);
-      const staffListResponse = response.data.results;
-      setUsers(staffListResponse);
+      setUsers(response.data.results);
     }catch (error) {
       setMessage(error);
       disappear(2000)
     }
     
   }
-   
     return (
         <>
          {message && <div className={`alert ${message === 'User details updated successfully' ? 'alert-success' : 'alert-danger'}`}>{message}</div>}

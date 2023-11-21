@@ -23,12 +23,7 @@ function AddUserForm() {
         }
         try {
             const response = await addUserAccount(data)
-            if (response.data.message) {
-                setMessage(response.data.message)
-                setTimeout(() => {
-                    setMessage('');
-                  }, 2000);
-            }
+            response.data.message && (setMessage(response.data.message), setTimeout(() => setMessage(''), 2000));
         } catch (error) {
             setMessage(error)
         }
@@ -71,7 +66,7 @@ function AddUserForm() {
                                     <div className="value">
                                         <div className="input-group">
                                             <input className="input--style-5" data-testid="password-input" type={showPassword ? `text` : 'password'} name="company"
-                                                value={password} onChange={(e) => { setPassword(e.target.value) }} />
+                                                value ={password} onChange={(e) => { setPassword(e.target.value) }} />
                                             <button
                                                 className="password-toggle"
                                                 type="button"
@@ -117,8 +112,6 @@ function AddUserForm() {
 
                                     </div>
                                 </div>
-
-
                                 <div className="text-center mt-3">
                                     <button className="btn btn--radius-2 btn--green ml-2" onClick={handleAddUser}>
                                         Add User

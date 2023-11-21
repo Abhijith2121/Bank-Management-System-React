@@ -15,7 +15,7 @@ function UpdateUser() {
     const [message, setMessage] = useState('');
 
     const disappear=(time)=>{
-        const timeoutId = setTimeout(() => {
+     setTimeout(() => {
             setMessage('');
           }, time);
     }
@@ -79,6 +79,7 @@ function UpdateUser() {
                                                 name="username"
                                                 value={userName}
                                                 onChange={(e) => setUserName(e.target.value)}
+                                                placeholder='Name'
                                             />
                                         </div>
                                     </div>
@@ -93,6 +94,7 @@ function UpdateUser() {
                                                 name="email"
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
+                                                placeholder='Email'
                                             />
                                         </div>
                                     </div>
@@ -107,6 +109,7 @@ function UpdateUser() {
                                                 name="user_type"
                                                 value={userType}
                                                 onChange={(e) => setUserType(e.target.value)}
+                                                placeholder='User Type'
                                             />
                                         </div>
                                     </div>
@@ -121,6 +124,7 @@ function UpdateUser() {
                                                 name="user_position"
                                                 value={userPosition}
                                                 onChange={(e) => setUserPosition(e.target.value)}
+                                                placeholder='User Position'
                                             />
                                         </div>
                                     </div>
@@ -135,6 +139,7 @@ function UpdateUser() {
                                                 name="status"
                                                 value={userStatus}
                                                 onChange={(e) => setUserStatus(e.target.value)}
+                                                placeholder='Status'
                                             />
                                         </div>
                                     </div>

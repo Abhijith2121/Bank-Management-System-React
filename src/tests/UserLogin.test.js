@@ -4,6 +4,7 @@ import UserLogin from '../components/userauthentication/UserLogin'
 import { MemoryRouter, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 
 
 
@@ -119,6 +120,26 @@ describe('UserLogin Component', () => {
         });
         
     });
+
+    test("toggles password visibility", async() => {
+        render(<MemoryRouter><UserLogin /></MemoryRouter>);
+    
+        const passwordInput = screen.getByPlaceholderText("Password");
+        expect(passwordInput.type).toBe("password");
+
+        const showPasswordButton = document.querySelector('.password-toggle');
+        userEvent.click(showPasswordButton);
+    
+        await waitFor(() => {
+            expect(passwordInput.type).toBe("text");
+          });
+          userEvent.click(showPasswordButton);
+
+          await waitFor(() => {
+            expect(passwordInput.type).toBe("password");
+          });
+
+      });
   
     test('forget password', async () => {
         render(<MemoryRouter><UserLogin /></MemoryRouter>);
@@ -145,4 +166,6 @@ describe('UserLogin Component', () => {
         });
         expect(mockSetItem).toHaveBeenCalledTimes(1);
     });
+
+    
 })

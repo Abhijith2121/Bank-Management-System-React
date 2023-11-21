@@ -18,22 +18,17 @@ function Transaction() {
     useEffect(() => {
         const fetchData = async () => {
             const authTokens = JSON.parse(localStorage.getItem('authTokens'));
-          const accountNumber1=authTokens?.access_token && jwtDecode(authTokens.access_token)?.account_number
-            if (accountNumber1) {
-                setAccountNumber(accountNumber1);
-                const data = {
-                    account_number: accountNumber1,
-                };
-            
+            const accountNumber1=authTokens?.access_token && jwtDecode(authTokens.access_token)?.account_number
+              setAccountNumber(accountNumber1);  
+               accountNumber1 && (async () => {
                 try {
-                    const response = await transactionsHistory(data);
-                    const transactionHistories = response.data.transactions;
-                    setTransactions(transactionHistories);
+                  const response = await transactionsHistory({ account_number: accountNumber1 });
+                  setTransactions(response.data.transactions);
                 } catch (error) {
-                    setMessage(error.message);
-                    disappear(2000);
+                  setMessage(error.message);
+                  disappear(2000);
                 }
-            }
+              })();
         }
 
         fetchData();

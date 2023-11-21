@@ -205,6 +205,37 @@ describe('UserList Component', () => {
     });
 
   });
+
+  test('navigates through pagination', async () => {
+    const nextLink = "next-page"
+    const previousLink = 'previous-page';
+  
+    pagination.mockResolvedValueOnce({ data: { results: [], next: nextLink, previous: previousLink } });
+    pagination.mockResolvedValueOnce({ data: { results: [], next: null, previous: null } });
+  
+    render(<StaffList />);
+  
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument();
+    });
+  
+    const nextButton = screen.getByRole('button', { name: 'Next' });
+    fireEvent.click(nextButton);
+  
+    await waitFor(() => {
+      expect(pagination).toHaveBeenCalledWith("next-page");
+    });
+  
+    const previousButton = screen.getByRole('button', { name: 'Previous' });
+    fireEvent.click(previousButton);
+  
+    await waitFor(() => {
+      expect(pagination).toHaveBeenCalledWith("previous-page");
+    });
+  });
+  
+
+  
   test('handles Next and Previous buttons for pagination', async () => {
     const nextLink = 'next-link';
     const previousLink = 'previous-link';
@@ -219,5 +250,30 @@ describe('UserList Component', () => {
     expect(screen.getByRole('button', { name: 'Previous' })).toBeInTheDocument();
   });
   });
+
+  test('renders error message when fetching users', async () => {
+    list.mockRejectedValueOnce('Failed to fetch users.');
   
+    render(<StaffList />);
+  
+    await waitFor(() => {
+      expect(screen.getByText('Failed to fetch users.')).toBeInTheDocument();
+    });
+  });
+
+  test('renders error message when fetching users', async () => {
+    const errorMessage = 'Failed to fetch users.';
+    list.mockRejectedValueOnce(errorMessage);
+  
+    render(
+      <MemoryRouter>
+        <StaffList />
+      </MemoryRouter>
+    );
+  
+    await waitFor(() => {
+      expect(screen.getByText(errorMessage)).toBeInTheDocument();
+    });
+  });
+ 
 });

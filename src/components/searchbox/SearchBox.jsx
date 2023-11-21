@@ -17,13 +17,7 @@ function SearchBox(props) {
                 value={props.search}
                 onChange={(e) => {
                   props.setSearch(e.target.value);
-                  if (e.target.value === '') {
-                    props.originalAccounts && props.setAccounts && props.setAccounts(props.originalAccounts);
-                    props.originalUsers && props.setUsers && props.setUsers(props.originalUsers);
-                  } else {
-                    props.handleSearchApi(props.search);
-                  }
-                  
+                  e.target.value === '' ? (props.originalAccounts && props.setAccounts && props.setAccounts(props.originalAccounts), props.originalUsers && props.setUsers && props.setUsers(props.originalUsers)) : props.handleSearchApi(props.search); 
                 }}
               />
               <a

@@ -10,14 +10,10 @@ module.exports = {
       "bank/src/contexts/AuthContext.js",
       "bank/src/contexts/UserContext.js",
       "bank/src/routers/ProtectedRouters.jsx",
-      "bank/src/routers/Router.jsx"
+      "bank/src/routers/Router.jsx",
       
     ],
-   
-    
-    
-    
-    
+  
    
   };
   

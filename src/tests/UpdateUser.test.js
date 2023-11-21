@@ -4,6 +4,7 @@ import { BrowserRouter, MemoryRouter, Route, Routes } from 'react-router-dom';
 import UpdateUser from '../components/managercomponents/updateuser/UpdateUser';
 import { userDetail,userDetailUpdate } from '../services/ApiServices';
 import '@testing-library/jest-dom';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../services/ApiServices', () => ({
     ...jest.requireActual('../services/ApiServices'),
@@ -75,6 +76,85 @@ describe('UpdateUser Component', () => {
       expect(screen.findByText('Failed to fetch user details'))
     });
   });
+
+  test("updates userposition input changes", async() => {
+    render(<MemoryRouter initialEntries={[`/updateuser/mockUserId`]}>
+    <UpdateUser />
+  </MemoryRouter>);
+
+    const userPositionInput = screen.getByPlaceholderText('User Position');
+    userEvent.type(userPositionInput, "New User Position");
+    // const nameInput = screen.getByPlaceholderText('Name');
+    // userEvent.type(nameInput, "New User");
+    // const emailInput = screen.getByPlaceholderText('Email');
+    // userEvent.type(emailInput, "Newuser@gmail.com");
+    // const userTypeInput = screen.getByPlaceholderText('User Type');
+    // userEvent.type(userTypeInput, "1");
+    // const statusInput = screen.getByPlaceholderText('Status');
+    // userEvent.type(statusInput, "allowed");
+
+    await waitFor(()=>{
+      expect(userPositionInput.value).toBe("New User Position");
+      // expect(nameInput.value).toBe("New User");
+      // expect(emailInput.value).toBe("Newuser@gmail.com");
+      // expect(userTypeInput.value).toBe("1");
+      // expect(statusInput.value).toBe("allowed");
+    })
+   
+   
+  });
+  test("updates name input changes", async() => {
+    render(<MemoryRouter initialEntries={[`/updateuser/mockUserId`]}>
+    <UpdateUser />
+  </MemoryRouter>);
+
+    const nameInput = screen.getByPlaceholderText('Name');
+    userEvent.type(nameInput, "New User");
+    await waitFor(()=>{
+      expect(nameInput.value).toBe("New User");
+    }) 
+  });
+
+  test("updates email input changes", async() => {
+    render(<MemoryRouter initialEntries={[`/updateuser/mockUserId`]}>
+    <UpdateUser />
+  </MemoryRouter>);
+    const emailInput = screen.getByPlaceholderText('Email');
+    userEvent.type(emailInput, "Newuser@gmail.com");
+
+    await waitFor(()=>{
+      expect(emailInput.value).toBe("Newuser@gmail.com");
+    })
+  });
+
+
+  test("updates usertype input changes", async() => {
+    render(<MemoryRouter initialEntries={[`/updateuser/mockUserId`]}>
+    <UpdateUser />
+  </MemoryRouter>);
+    
+    const userTypeInput = screen.getByPlaceholderText('User Type');
+    userEvent.type(userTypeInput, "1");
+    await waitFor(()=>{
+      expect(userTypeInput.value).toBe("1");
+    })
+  });
+
+  test("updates userposition input changes", async() => {
+    render(<MemoryRouter initialEntries={[`/updateuser/mockUserId`]}>
+    <UpdateUser />
+  </MemoryRouter>);
+
+    const statusInput = screen.getByPlaceholderText('Status');
+    userEvent.type(statusInput, "allowed");
+
+    await waitFor(()=>{
+      expect(statusInput.value).toBe("allowed");
+    })
+   
+   
+  });
+
   test('handles userDetailUpdate API fails', async () => {
     userDetailUpdate.mockRejectedValue(('Failed to update user details'));
   
@@ -102,4 +182,14 @@ describe('UpdateUser Component', () => {
       expect(screen.findByText('Please fill in all fields'))
     });
   })
+
+  test("handles successful user update", async () => {
+    userDetailUpdate.mockResolvedValue({ data: { message: "Update successful" } });
+    render(<UpdateUser />);
+    fireEvent.click(screen.getByText('Update'));
+    await waitFor(() => {
+      const successMessage = screen.getByText(/update successful/i);
+      expect(successMessage).toBeInTheDocument();
+    });
+  });
 });
